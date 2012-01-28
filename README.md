@@ -2,7 +2,7 @@
 ## Overview
 The goal is to make a REST Full web service example under `NodeJS`, `ExpressJs` and `Mongoose` (**MongoDB**) to effectively manage a category tree localized in several languages.
 I assume you have already installed node and the various extensions mentioned above.
-The project can be downloaded from Git here.
+The project can be downloaded from [Git here](#https://github.com/KillWil/Category-Tree-and-localization-with-nodeJS).
 
 ---
 
