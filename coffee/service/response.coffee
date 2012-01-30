@@ -12,8 +12,8 @@ http.ServerResponse::respond = (content, status) ->
       status = 200
   unless status is 200
     content =
-    code: status
-    status: http.STATUS_CODES[status]
-    message: content and content.toString() or null
+    Code: status
+    Status: http.STATUS_CODES[status]
+    Message: content and content.toString() or null
   content = result: content  unless "object" is typeof content
   @send JSON.stringify(content) + "\n", status
