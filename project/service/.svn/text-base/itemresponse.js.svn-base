@@ -1,0 +1,16 @@
+(function() {
+  var ItemResponse;
+
+  module.exports = ItemResponse = (function() {
+
+    function ItemResponse(Success, LanguageCode, Item) {
+      this.success = Success;
+      this.LanguageCode = LanguageCode;
+      this.result = Item;
+    }
+
+    return ItemResponse;
+
+  })();
+
+}).call(this);

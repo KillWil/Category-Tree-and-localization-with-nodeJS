@@ -1,0 +1,28 @@
+10
+
+dir
+0
+svn://192.168.2.21/wilfrid/express/mongoosetest/utils
+svn://192.168.2.21/wilfrid
+add
+
+
+
+
+
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+4f8423ad-df8f-4202-84c4-eaf08f075395
+

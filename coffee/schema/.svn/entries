@@ -1,0 +1,35 @@
+10
+
+dir
+10
+svn://192.168.2.21/wilfrid/express/coffee/schema
+svn://192.168.2.21/wilfrid
+
+
+
+2012-01-25T18:18:28.433759Z
+10
+wilfrid
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+4f8423ad-df8f-4202-84c4-eaf08f075395
+
+rubriquesSchema.coffee
+file
+0
+
+
+add
+

@@ -1,0 +1,6 @@
+module.exports =
+  class ErrorResponse
+    constructor: (Message, ErrorType) ->
+      @success = false
+      @type = ErrorType
+      @message = Message

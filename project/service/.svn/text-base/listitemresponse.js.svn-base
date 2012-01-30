@@ -1,0 +1,19 @@
+(function() {
+  var ListItemResponse;
+
+  module.exports = ListItemResponse = (function() {
+
+    function ListItemResponse(Success, LanguageCode, Page, Records, TotalRecords, ListItem) {
+      this.success = Success;
+      this.LanguageCode = LanguageCode;
+      this.Page = Page;
+      this.Records = Records;
+      this.TotalRecords = TotalRecords;
+      this.result = ListItem;
+    }
+
+    return ListItemResponse;
+
+  })();
+
+}).call(this);

@@ -1,0 +1,7 @@
+module.exports =
+class ItemResponse
+  constructor: (Success, LanguageCode, Item) ->
+    @success = Success
+    @LanguageCode = LanguageCode
+    @result = Item
+

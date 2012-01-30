@@ -1,0 +1,10 @@
+module.exports =
+  class ListItemResponse
+    constructor: (Success, LanguageCode, Page, Records, TotalRecords, ListItem) ->
+      @success = Success
+      @LanguageCode = LanguageCode
+      @Page = Page
+      @Records = Records
+      @TotalRecords = TotalRecords
+      @result = ListItem
+

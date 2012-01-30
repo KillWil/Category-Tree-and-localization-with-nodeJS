@@ -1,0 +1,772 @@
+var Rubrique = require('../schema/rubriquesSchema.js');
+var RubriqueDto = exports.RubriqueDto = require('../dto/rubriqueDto.js');
+var ItemResponse = exports.ItemResponse = require('../service/itemresponse.js');
+var ListItemResponse = exports.ListItemResponse = require('../service/listitemresponse.js');
+var ErrorResponse = exports.ErrorResponse = require('../service/errorresponse.js');
+
+module.exports = function (options) {
+
+    return {
+
+        // GET options
+        "GetCategory": function GetCategory(CategoryId, LanguageCode, callback){
+            Rubrique.findOne({_id:CategoryId}, function (err, document) {
+                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                if(!document) return callback(new ErrorResponse("Category " + CategoryId + " not found","ENOTFOUND"));
+                var dto = new RubriqueDto().RubriqueToItem(document,LanguageCode);
+                var rep = new ItemResponse(true,LanguageCode,dto);
+                return callback(undefined,rep);
+            });
+        },
+
+        "GetAscendants": function GetAscendants(CategoryId, LanguageCode, Page, Limit, callback){
+            if (!CategoryId){
+                return callback(new ErrorResponse("Le CategoryId est obligatoire","EVALIDATION"));
+            }
+
+            if (!Page){ // Si pas de page on est sur la première
+                Page = 0;
+            }
+
+            if (!Limit){ // Si pas de limite on récupère 10 enregistrements
+                Limit = 10;
+            }
+
+            // Insertion d'une rubrique
+            Rubrique.findOne({"_id":CategoryId}, function (err, document) {
+                if (!document || document == null || document.length == 0) {
+                    return callback(new ErrorResponse("Insertion impossible, la catégorie " + CategoryId + " n'existe plus !","ENOTFOUND"));
+                }
+
+                var bgi = document.LB;
+                var bdi = document.RB;
+                var nivi = document.Level;
+
+                var query = Rubrique.find({});
+                query.find({LB : {$lt : bgi}, RB : {$gt : bdi}} );
+                query.count();
+                query.run(function (err, count){
+                    if (count > 0){
+                        var query = Rubrique.find({});
+                        query.find({LB : {$lt : bgi}, RB : {$gt : bdi}} );
+                        query.asc("LB");
+                        query.limit(Limit);
+                        query.skip(Limit * Page);
+                        query.run(function (err, documents){
+                            if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            var dto = new RubriqueDto().RubriqueToListItem(documents,LanguageCode);
+                            var rep = new ListItemResponse(true,LanguageCode,Page,dto.length,count,dto);
+                            return callback(undefined,rep);
+                        })
+                    }else{
+                        var rep = new ListItemResponse(true,LanguageCode,Page,0,0,{});
+                        return callback(undefined,rep);
+                    }
+
+                });
+            });
+
+        },
+
+        "GetCategoryAndAscendants": function GetCategoryAndAscendants(CategoryId, LanguageCode, Page, Limit, callback){
+            if (!CategoryId){
+                return callback(new ErrorResponse("Le CategoryId est obligatoire","EVALIDATION"));
+            }
+
+            if (!Page){ // Si pas de page on est sur la première
+                Page = 0;
+            }
+
+            if (!Limit){ // Si pas de limite on récupère 10 enregistrements
+                Limit = 10;
+            }
+
+            console.log(Page);
+            console.log(Limit);
+
+            // Insertion d'une rubrique
+            Rubrique.findOne({"_id":CategoryId}, function (err, document) {
+                if (!document || document == null || document.length == 0) {
+                    return callback(new ErrorResponse("Insertion impossible, la catégorie " + CategoryId + " n'existe plus !","ENOTFOUND"));
+                }
+
+                var bgi = document.LB;
+                var bdi = document.RB;
+                var nivi = document.Level;
+                var query = Rubrique.find({});
+                query.find({LB : {$lte : bgi}, RB : {$gte : bdi}} );
+                query.count();
+                query.run(function (err, count){
+                    if (count > 0){
+                        var query = Rubrique.find({});
+                        query.find({LB : {$lte : bgi}, RB : {$gte : bdi}} );
+                        query.asc("LB");
+                        query.limit(Limit);
+                        query.skip(Limit * Page);
+                        query.run(function (err, documents){
+                            if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            var dto = new RubriqueDto().RubriqueToListItem(documents,LanguageCode);
+                            var rep = new ListItemResponse(true,LanguageCode,Page,dto.length,count,dto);
+                            return callback(undefined,rep);
+                        })
+                    }else{
+                        var rep = new ListItemResponse(true,LanguageCode,Page,0,0,{});
+                        return callback(undefined,rep);
+                    }
+
+                });
+            });
+
+        },
+
+        "GetDescendants": function GetDescendants(CategoryId, LanguageCode, Page, Limit, callback){
+            if (!CategoryId){
+                return callback(new ErrorResponse("Le CategoryId est obligatoire","ENOTFOUND"));
+            }
+
+            if (!Page){ // Si pas de page on est sur la première
+                Page = 0;
+            }
+
+            if (!Limit){ // Si pas de limite on récupère 10 enregistrements
+                Limit = 10;
+            }
+
+            // Insertion d'une rubrique
+            Rubrique.findOne({"_id":CategoryId}, function (err, document) {
+                if (!document || document == null || document.length == 0) {
+                    return callback(new ErrorResponse("Insertion impossible, la catégorie " + CategoryId + " n'existe plus !","ENOTFOUND"));
+                }
+
+                var bgi = document.LB;
+                var bdi = document.RB;
+                var nivi = document.Level;
+
+                var query = Rubrique.find({});
+                query.find({LB : {$gt : bgi}, RB : {$lt : bdi}} );
+                query.count();
+                query.run(function (err, count){
+                    if (count > 0){
+                        var query = Rubrique.find({});
+                        query.find({LB : {$gt : bgi}, RB : {$lt : bdi}} );
+                        query.limit(Limit);
+                        query.skip(Limit * Page);
+                        query.run(function (err, documents){
+                            if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            var dto = new RubriqueDto().RubriqueToListItem(documents,LanguageCode);
+                            var rep = new ListItemResponse(true,LanguageCode,Page,dto.length,count,dto);
+                            return callback(undefined,rep);
+                        })
+                    }else{
+                        var rep = new ListItemResponse(true,LanguageCode,Page,0,0,{});
+                        return callback(undefined,rep);
+                    }
+
+                });
+            });
+
+        },
+
+        "GetCategoryAndDescendants": function GetCategoryAndDescendants(CategoryId, LanguageCode, Page, Limit, callback){
+            if (!CategoryId){
+                return callback(new ErrorResponse("Le CategoryId est obligatoire","ENOTFOUND"));
+            }
+
+            if (!Page){ // Si pas de page on est sur la première
+                Page = 0;
+            }
+
+            if (!Limit){ // Si pas de limite on récupère 10 enregistrements
+                Limit = 10;
+            }
+
+            // Insertion d'une rubrique
+            Rubrique.findOne({"_id":CategoryId}, function (err, document) {
+                if (!document || document == null || document.length == 0) {
+                    return callback(new ErrorResponse("Insertion impossible, la catégorie " + CategoryId + " n'existe plus !","ENOTFOUND"));
+                }
+
+                var bgi = document.LB;
+                var bdi = document.RB;
+                var nivi = document.Level;
+
+                var query = Rubrique.find({});
+                query.find({LB : {$gte : bgi}, RB : {$lte : bdi}} );
+                query.count();
+                query.run(function (err, count){
+                    if (count > 0){
+                        var query = Rubrique.find({});
+                        query.find({LB : {$gte : bgi}, RB : {$lte : bdi}} );
+                        query.limit(Limit);
+                        query.skip(Limit * Page);
+                        query.run(function (err, documents){
+                            if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            var dto = new RubriqueDto().RubriqueToListItem(documents,LanguageCode);
+                            var rep = new ListItemResponse(true,LanguageCode,Page,dto.length,count,dto);
+                            return callback(undefined,rep);
+                        })
+                    }else{
+                        var rep = new ListItemResponse(true,LanguageCode,Page,0,0,{});
+                        return callback(undefined,rep);
+                    }
+
+                });
+            });
+
+        },
+
+        "GetChildren": function GetChildren(CategoryId, LanguageCode, Page, Limit, callback){
+            if (!CategoryId){
+                return callback(new ErrorResponse("Le CategoryId est obligatoire","EVALIDATION"));
+            }
+
+            if (!Page){ // Si pas de page on est sur la première
+                Page = 0;
+            }
+
+            if (!Limit){ // Si pas de limite on récupère 10 enregistrements
+                Limit = 10;
+            }
+
+            console.log(Page);
+            console.log(Limit);
+
+            // Insertion d'une rubrique
+            Rubrique.findOne({"_id":CategoryId}, function (err, document) {
+                if (!document || document == null || document.length == 0) {
+                    return callback(new ErrorResponse("Insertion impossible, la catégorie " + CategoryId + " n'existe plus !","ENOTFOUND"));                }
+
+                var bgi = document.LB;
+                var bdi = document.RB;
+                var nivi = document.Level;
+
+                var query = Rubrique.find({});
+                query.find({LB : {$gt : bgi}, RB : {$lt : bdi}, Level : (nivi + 1)} );
+                query.count();
+                query.run(function (err, count){
+                    if (count > 0){
+                        var query = Rubrique.find({});
+                        query.find({LB : {$gt : bgi}, RB : {$lt : bdi}, Level : (nivi + 1)} );
+                        query.asc("LB");
+                        query.limit(Limit);
+                        query.skip(Limit * Page);
+                        query.run(function (err, documents){
+                            if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            var dto = new RubriqueDto().RubriqueToListItem(documents,LanguageCode);
+                            var rep = new ListItemResponse(true,LanguageCode,Page,dto.length,count,dto);
+                            return callback(undefined,rep);
+                        })
+                    }else{
+                        var rep = new ListItemResponse(true,LanguageCode,Page,0,0,{});
+                        return callback(undefined,rep);
+                    }
+
+                });
+            });
+
+        },
+
+        "GetCategoryAndChildren": function GetCategoryAndChildren(CategoryId, LanguageCode, Page, Limit, callback){
+            if (!CategoryId){
+                return callback(new ErrorResponse("Le CategoryId est obligatoire","EVALIDATION"));
+            }
+
+            if (!Page){ // Si pas de page on est sur la première
+                Page = 0;
+            }
+
+            if (!Limit){ // Si pas de limite on récupère 10 enregistrements
+                Limit = 10;
+            }
+
+            // Insertion d'une rubrique
+            Rubrique.findOne({"_id":CategoryId}, function (err, document) {
+                if (!document || document == null || document.length == 0) {
+                    return callback(new ErrorResponse("Insertion impossible, la catégorie " + CategoryId + " n'existe plus !","ENOTFOUND"));                }
+
+                var bgi = document.LB;
+                var bdi = document.RB;
+                var nivi = document.Level;
+
+                var query = Rubrique.find({});
+                query.find({LB : {$gte : bgi}, RB : {$lte : bdi}, Level : {$lte: (nivi + 1)}} );
+                query.count();
+                query.run(function (err, count){
+                    if (count > 0){
+                        var query = Rubrique.find({});
+                        query.find({LB : {$gte : bgi}, RB : {$lte : bdi}, Level : {$lte: (nivi + 1)}} );
+                        query.asc("LB");
+                        query.limit(Limit);
+                        query.skip(Limit * Page);
+                        query.run(function (err, documents){
+                            if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            var dto = new RubriqueDto().RubriqueToListItem(documents,LanguageCode);
+                            var rep = new ListItemResponse(true,LanguageCode,Page,dto.length,count,dto);
+                            return callback(undefined,rep);
+                        })
+                    }else{
+                        var rep = new ListItemResponse(true,LanguageCode,Page,0,0,{});
+                        return callback(undefined,rep);
+                    }
+
+                });
+            });
+
+        },
+
+        "GetParent": function GetParent(CategoryId, LanguageCode, callback){
+            if (!CategoryId){
+                return callback(new ErrorResponse("Le CategoryId est obligatoire","EVALIDATION"));
+            }
+
+            Rubrique.findOne({"_id":CategoryId}, function (err, document) {
+                if (!document || document == null || document.length == 0) {
+                    return callback(new ErrorResponse("Insertion impossible, la catégorie " + CategoryId + " n'existe plus !","ENOTFOUND"));
+                }
+
+                var bgi = document.LB;
+                var bdi = document.RB;
+                var nivi = document.Level;
+
+                Rubrique.findOne({LB:{$lt : bgi}, RB: {$gt : bdi}, Level: (nivi-1) }, function (err, document) {
+                    if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                    var dto = new RubriqueDto().RubriqueToItem(document,LanguageCode);
+                    var rep = new ItemResponse(true,LanguageCode,dto);
+                    return callback(undefined,rep);
+                });
+
+            });
+
+        },
+
+        "GetRootElement": function GetRootElement(LanguageCode, callback){
+            Rubrique.findOne({LB:1}, function (err, document) {
+                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                var dto = new RubriqueDto().RubriqueToItem(document,LanguageCode);
+                var rep = new ItemResponse(true,LanguageCode,dto);
+                return callback(undefined,rep);
+            });
+        },
+
+        // INSERT
+        "Insert": function Insert(Titre, IdParent, Mode, callback){
+
+            if(!Mode || !Titre){
+                return callback(new ErrorResponse("Le titre et le Mode d'insertion sont obligatoires","EVALIDATION"));
+            }
+
+            if(['fc','lc','fs','ls','p'].indexOf(Mode)==-1){
+                return callback(new ErrorResponse("Mode d'insertion inconnu","EVALIDATION"));
+            }
+
+            if(!IdParent){
+                // Rubrique de base ou Rubrique colatérale ?
+                Rubrique.count({}, function( err, count){
+
+                    if(count==0){
+                        // rien dans la base on insère le premier élément
+                        if(['fc','lc'].indexOf(Mode)>=0){
+                            return callback(new ErrorResponse("Insertion impossible dans un arbre pour un fils sans père !","ENOTFOUND"));
+                        }
+
+                        var R = new Rubrique();
+                        R.Title = Titre;
+                        R.Level = 0;
+                        R.LB = 1;
+                        R.RB = 2;
+                        R.save(function (err, document) {
+                            if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            return callback(undefined, {_id:document._id});
+                        });
+
+                    }else{
+                        return callback(new ErrorResponse("Insertion impossible dans un arbre pour un collatéral sans précision du parent !","ENOTFOUND"));
+                    }
+                })
+            }else{
+                // Insertion d'une rubrique
+                Rubrique.findOne({"_id" : IdParent}, function( err, document){
+
+                    if (!document || document == null || document.length == 0 ){
+                        return callback(new ErrorResponse("Insertion impossible, le parent n'existe plus !","ENOTFOUND"));
+                    }
+                    // Récupération des valeurs de la rubrique parente
+                    var bgp = document.LB;
+                    var bdp = document.RB;
+                    var nivp = document.Level;
+
+                    switch(Mode){
+                        case 'p': // Insertion d'un père
+
+                            Rubrique.update({ RB: { $gt: bdp } }, { $inc: { RB: 2 }}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                                Rubrique.update({ LB: { $gt: bgp } }, { $inc: { LB: 2 }}, { multi: true }, function(err){
+                                    if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                                    Rubrique.update({ LB: { $gte: bgp }, RB: { $lte: bdp } }, { $inc: { LB: 1 , RB: 1 , Level: 1 }}, { multi: true }, function(err){
+                                        if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                                        var R = new Rubrique();
+                                        R.Title = Titre;
+                                        R.Level = nivp;
+                                        R.LB = bgp;
+                                        R.RB = bdp + 2 ;
+                                        R.save(function (err, document) {
+                                            if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                                            return callback(undefined, {_id:document._id});
+                                        });
+                                    })
+                                })
+                            })
+                            break;
+                        case 'fs': // Insertion d'un grand frère
+                            Rubrique.update({ RB: { $gt: bgp } }, { $inc: { RB: 2 }}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                                Rubrique.update({ LB: { $gte: bgp } }, { $inc: { LB: 2 }}, { multi: true }, function(err){
+                                    if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                                    var bgi = bgp
+                                    var bdi = bgp + 1
+                                    var nivi = nivp
+                                    var R = new Rubrique();
+                                    R.Title = Titre;
+                                    R.Level = nivi;
+                                    R.LB = bgi;
+                                    R.RB = bdi;
+                                    R.save(function (err, document) {
+                                        if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                                        return callback(undefined, {_id:document._id});
+                                    });
+                                })
+                            })
+
+                            break;
+                        case 'ls': // Insertion d'un petit frère
+                            Rubrique.update({ RB: { $gt: bdp } }, { $inc: { RB: 2 }}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                                Rubrique.update({ LB: { $gte: bdp } }, { $inc: { LB: 2 }}, { multi: true }, function(err){
+                                    if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                                    var bgi = bdp + 1;
+                                    var bdi = bdp + 2;
+                                    var nivi = nivp;
+                                    var R = new Rubrique();
+                                    R.Title = Titre;
+                                    R.Level = nivi;
+                                    R.LB = bgi;
+                                    R.RB = bdi;
+                                    R.save(function (err, document) {
+                                        if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                                        return callback(undefined, {_id:document._id});
+                                    });
+                                })
+                            })
+
+                            break;
+                        case 'fc': // Insertion d'un fils ainé
+                            Rubrique.update({ RB: { $gt: bgp } }, { $inc: { RB: 2 }}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                                Rubrique.update({ LB: { $gt: bgp } }, { $inc: { LB: 2 }}, { multi: true }, function(err){
+                                    if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                                    var bgi = bgp + 1;
+                                    var bdi = bgp + 2;
+                                    var nivi = nivp + 1 ;
+                                    var R = new Rubrique();
+                                    R.Title = Titre;
+                                    R.Level = nivi;
+                                    R.LB = bgi;
+                                    R.RB = bdi;
+                                    R.save(function (err, document) {
+                                        if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                                        return callback(undefined, {_id:document._id});
+                                    });
+                                })
+                            })
+
+                            break;
+                        case 'lc': // Insertion d'un fils cadet
+                            Rubrique.update({ RB: { $gte: bdp } }, { $inc: { RB: 2 }}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                                Rubrique.update({ LB: { $gt: bdp } }, { $inc: { LB: 2 }}, { multi: true }, function(err){
+                                    if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                                    var bgi = bdp;
+                                    var bdi = bdp + 1;
+                                    var nivi = nivp + 1 ;
+                                    var R = new Rubrique();
+                                    R.Title = Titre;
+                                    R.Level = nivi;
+                                    R.LB = bgi;
+                                    R.RB = bdi;
+                                    R.save(function (err, document) {
+                                        if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                                        return callback(undefined, {_id:document._id});
+                                    });
+                                })
+                            })
+                            break;
+                    }
+
+                })
+            }
+        },
+
+        "InsertGlobalization": function InsertGlobalization(CategoryId, CountryCode, Title, callback){
+
+            if(!CategoryId){
+                return callback(new ErrorResponse("La catégorie est obligatoire","EVALIDATION"));
+            }
+
+            if(!CountryCode){
+                return callback(new ErrorResponse("Le code pays est obligatoire","EVALIDATION"));
+            }
+
+            if(!Title){
+                return callback(new ErrorResponse("Le titre est obligatoire","EVALIDATION"));
+            }
+
+            try{
+                Rubrique.update({_id:CategoryId, "Globalization.CountryCode": {"$ne": CountryCode}}, {"$push": { Globalization : {CountryCode : CountryCode, Title : Title} } },function(err,count){
+                    if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                    if (count==0){
+                        var rep = {success:false, AffectedRecords:count}
+                        return callback(undefined,rep);
+                    }else{
+                        var rep = {success:true, AffectedRecords:count}
+                        return callback(undefined,rep);
+                    }
+                } );
+            }
+            catch(err){
+                var rep = {success: true, message: err}
+                return callback(undefined,rep);
+            }
+        },
+
+        // DELETE
+        "Delete": function Delete(CategoryId, RecursiveMode, callback){
+            if(!CategoryId){
+                return callback(new ErrorResponse("Le CategoryId est obligatoire","EVALIDATION"));
+            }
+
+            if(RecursiveMode==undefined){
+                return callback(new ErrorResponse("Le mode recursif est obligatoire","EVALIDATION"));
+            }
+
+            Rubrique.findOne({"_id":CategoryId}, function (err, document) {
+                if (!document || document == null || document.length == 0) {
+                    return callback(new ErrorResponse("Supression impossible, la catégorie " + CategoryId + " n'existe plus !","ENOTFOUND"));
+                }
+                // Récupération des valeurs de la rubrique
+                var bgb = document.LB;
+                var bdb = document.RB;
+                var nivb = document.Level;
+
+                if (RecursiveMode == true){
+                    // supression du sous arbre
+                    var delta = bdb - bgb + 1;
+                    // suppression de tous les éléments
+
+                    Rubrique.remove({LB:{$gte : bgb}, RB:{$lte : bdb}},function(err){
+                        if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                    });
+
+                    Rubrique.update({LB:{$gt : bdb}}, {$inc:{LB :(-delta)}}, { multi: true },function(err){
+                        if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                    });
+
+                    Rubrique.update({RB:{$gt : bdb}}, {$inc:{RB :(-delta)}}, { multi: true },function(err){
+                        if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                    });
+
+                    return callback(undefined,{success: true});
+
+                }else{
+                    // supression de la catégorie uniquement
+
+                    Rubrique.remove({_id:CategoryId},function(err){
+                        if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                    });
+
+                    Rubrique.update({LB:{$gt : bgb}, RB:{$lt: bdb}}, {$inc:{ LB:(-1), RB:(-1), Level:(-1)}}, { multi: true },function(err){
+                        if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                    });
+
+                    Rubrique.update({LB:{$gt : bdb}}, {$inc:{LB :(-2)}}, { multi: true },function(err){
+                        if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                    });
+
+                    Rubrique.update({RB:{$gt : bdb}}, {$inc:{RB :(-2)}}, { multi: true },function(err){
+                        if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                    });
+
+                    return callback(undefined,{success: true});
+
+                }
+            });
+
+        },
+
+        "DeleteGlobalization": function DeleteGlobalization(CategoryId, CountryCode, callback){
+
+            if(!CategoryId){
+                return callback(new ErrorResponse("Le mode recursif est obligatoire","EVALIDATION"));
+            }
+
+            if(!CountryCode){
+                return callback(new ErrorResponse("Le code pays est obligatoire","EVALIDATION"));
+            }
+
+            Rubrique.update({_id:CategoryId, "Globalization.CountryCode": CountryCode}, {"$pull": { Globalization : {CountryCode : CountryCode} } },function(err,count){
+
+                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                if (count==0){
+                    var rep = {success:false, AffectedRecords:count}
+                    return callback(undefined,rep);
+                }else{
+                    var rep = {success:true, AffectedRecords:count}
+                    return callback(undefined,rep);
+                }
+            } );
+        },
+
+        // MOVE
+        "Move" : function Move(CategoryId, ParentCategoryId, Mode, callback){
+            if(!Mode || !CategoryId || !ParentCategoryId){
+                return callback(new ErrorResponse("Déplacement impossible","EVALIDATION"));
+            }
+
+            if(['fc','lc'].indexOf(Mode)==-1){
+                return callback(new ErrorResponse("Mode inconnu","EVALIDATION"));
+            }
+
+            if(CategoryId==ParentCategoryId){
+                return callback(new ErrorResponse("Déplacement impossible, le parent et le noeud sont identiques","EVALIDATION"));
+            }
+
+            Rubrique.findOne({"_id" : CategoryId}, function( err, CategoryDocument){
+
+                if (!CategoryDocument || CategoryDocument == null || CategoryDocument.length == 0 ){
+                    return callback(new ErrorResponse("Déplacement impossible, la catégorie n'existe plus !","ENOTFOUND"));
+                }
+                Rubrique.findOne({"_id" : ParentCategoryId}, function( err, ParentCategoryDocument){
+
+                    if (!ParentCategoryDocument || ParentCategoryDocument == null || ParentCategoryDocument.length == 0 ){
+                        return callback(new ErrorResponse("Déplacement impossible, la catégorie parente n'existe plus !","ENOTFOUND"));
+                    }
+
+                    var bgi = CategoryDocument.LB,
+                        bdi = CategoryDocument.RB,
+                        nivi = CategoryDocument.Level,
+                        Delta = bdi - bgi;
+
+                    var bgp = ParentCategoryDocument.LB,
+                        bdp = ParentCategoryDocument.RB,
+                        nivp = ParentCategoryDocument.Level,
+                        DeltaParent = bdp - bgp;
+
+                    // Si le parent est un descendant du noeud qu'on déplace, on sort
+
+                    if (bgp>bgi && bdp<bdi){
+                        return callback(new ErrorResponse("Déplacement impossible, la destination est un descendant du noeux à déplacer","EVALIDATION"));
+                    }
+
+                    // Calcul du décalage
+                    var Decalage = bgi - bgp;
+                    var DecalageDroit = bdi - bdp;
+
+                    if ((Decalage>0 && DecalageDroit>0) || (Decalage>0 && DecalageDroit<0 && Mode == 'fc')) {
+                        // Décalage vers la gauche
+                        if (Mode == 'fc'){
+                            // First Child (premier fils du parent)
+                            // On commence par faire un trou dans l'arbre de la largeur du noeud à insérer
+                            Rubrique.update({ LB: { $gt: bgp  } }, { $inc: { LB: (Delta + 1) }}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            Rubrique.update({ RB: { $gt: bgp  } }, { $inc: { RB: (Delta + 1) }}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            // On déplace le noeud et ses enfants dans le trou
+                            Rubrique.update({ LB: { $gte: bgi + Delta + 1  }, RB: { $lte: bdi + Delta + 1  } }, { $inc: { LB: (- Delta - Decalage), RB: (- Delta -Decalage), Level: (nivp - nivi + 1) }}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            // On rebouche le nouveau trou
+                            Rubrique.update({ LB: { $gt: bgi + Delta  } }, { $inc: { LB: (- Delta - 1)}}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            Rubrique.update({ RB: { $gt: bgi + Delta  } }, { $inc: { RB: (- Delta - 1)}}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            return callback(undefined, {_id:CategoryDocument._id});
+                        }else{
+                            //var er = {message:"la"}
+                            //return callback(er);
+                            // Last Child (dernier fils du parent)
+                            Rubrique.update({ RB: { $gte: bdp  } }, { $inc: { RB: (Delta + 1) }}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            Rubrique.update({ LB: { $gt: bdp  } }, { $inc: { LB: (Delta + 1) }}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            // On déplace le noeud et ses enfants dans le trou
+                            Rubrique.update({ LB: { $gte: (bgi + Delta + 1)}, RB: { $lte: (bdi + Delta + 1) }}, { $inc: { LB: (- Delta - Decalage + DeltaParent - 1), RB: (- Delta -Decalage + DeltaParent - 1), Level: (nivp - nivi + 1) }}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            // On rebouche le nouveau trou
+                            Rubrique.update({ LB: { $gt: (bgi + Delta)  } }, { $inc: { LB: (- Delta - 1)}}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            Rubrique.update({ RB: { $gt: (bgi + Delta)  } }, { $inc: { RB: (- Delta - 1)}}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                                return callback(undefined, {_id:CategoryDocument._id});
+
+                        }
+
+                    }else{
+
+                        if (Mode == 'fc'){
+                            // décalage vers la droite
+                            Rubrique.update({ LB: { $gt: bgp  } }, { $inc: { LB: (Delta + 1) }}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            Rubrique.update({ RB: { $gt: bgp  } }, { $inc: { RB: (Delta + 1) }}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            // On déplace le noeud et ses enfants dans le trou
+                            Rubrique.update({ LB: { $gte: bgi }, LB: { $lte: bdi } }, { $inc: { LB: (- Decalage + 1), RB: (- Decalage + 1), Level: (nivp - nivi + 1) }}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            // On rebouche le nouveau trou
+                            Rubrique.update({ LB: { $gt: bgi } }, { $inc: { LB: (- Delta - 1)}}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            Rubrique.update({ RB: { $gt: bgi } }, { $inc: { RB: (- Delta - 1)}}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            return callback(undefined, {_id:CategoryDocument._id});
+                        }else{
+                            // décalage vers la gauche
+                            //var er = {message:"la"}
+                            //return callback(er);
+                            Rubrique.update({ LB: { $gt: bdp  } }, { $inc: { LB: (Delta + 1) }}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            Rubrique.update({ RB: { $gte: bdp  } }, { $inc: { RB: (Delta + 1) }}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            // On déplace le noeud et ses enfants dans le trou
+                            Rubrique.update({ LB: { $gte: bgi, $lte: bdi } }, { $inc: { LB: (- Decalage + DeltaParent), RB: (- Decalage + DeltaParent), Level: (nivp - nivi + 1) }}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            // On rebouche le nouveau trou
+                            Rubrique.update({ LB: { $gt: bgi } }, { $inc: { LB: (- Delta - 1)}}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            Rubrique.update({ RB: { $gt: bgi } }, { $inc: { RB: (- Delta - 1)}}, { multi: true }, function(err){
+                                if (err) return callback(new ErrorResponse(err,"EOTHER"));
+                            });
+                            return callback(undefined, {_id:CategoryDocument._id});
+                        }
+                    }
+                })
+            })
+        }
+    }
+
+};

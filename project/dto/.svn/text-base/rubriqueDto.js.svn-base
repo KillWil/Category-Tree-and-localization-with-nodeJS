@@ -1,0 +1,78 @@
+(function() {
+  var DtoUtils, GetLocalTitle, RubriqueItem, RubriqueListItem;
+
+  RubriqueItem = (function() {
+
+    RubriqueItem._id;
+
+    RubriqueItem.Title;
+
+    function RubriqueItem(document, LanguageCode) {
+      if (LanguageCode && document.Globalization) {
+        this.Title = GetLocalTitle(document.Globalization, LanguageCode);
+      }
+      if (!this.Title) this.Title = document.Title;
+      this._id = document._id;
+    }
+
+    return RubriqueItem;
+
+  })();
+
+  RubriqueListItem = (function() {
+
+    RubriqueListItem._id;
+
+    RubriqueListItem.Title;
+
+    function RubriqueListItem(document, LanguageCode) {
+      if (LanguageCode && document.Globalization) {
+        this.Title = GetLocalTitle(document.Globalization, LanguageCode);
+      }
+      if (!this.Title) this.Title = document.Title;
+      this._id = document._id;
+    }
+
+    return RubriqueListItem;
+
+  })();
+
+  module.exports = DtoUtils = (function() {
+
+    function DtoUtils() {}
+
+    DtoUtils.prototype.RubriqueToItem = function(document, LanguageCode) {
+      var Item;
+      Item = new RubriqueItem(document, LanguageCode);
+      return Item;
+    };
+
+    DtoUtils.prototype.RubriqueToListItem = function(documents, LanguageCode) {
+      var ListItem, document;
+      return ListItem = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = documents.length; _i < _len; _i++) {
+          document = documents[_i];
+          _results.push(new RubriqueItem(document, LanguageCode));
+        }
+        return _results;
+      })();
+    };
+
+    return DtoUtils;
+
+  })();
+
+  GetLocalTitle = function(documents, LanguageCode) {
+    var i;
+    i = 0;
+    while (documents.length > i) {
+      if (documents[i].CountryCode === LanguageCode) return documents[i].Title;
+      i += 1;
+    }
+  };
+
+  "";
+
+}).call(this);

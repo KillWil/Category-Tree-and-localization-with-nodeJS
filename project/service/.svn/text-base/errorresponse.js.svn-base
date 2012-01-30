@@ -1,0 +1,16 @@
+(function() {
+  var ErrorResponse;
+
+  module.exports = ErrorResponse = (function() {
+
+    function ErrorResponse(Message, ErrorType) {
+      this.success = false;
+      this.type = ErrorType;
+      this.message = Message;
+    }
+
+    return ErrorResponse;
+
+  })();
+
+}).call(this);
