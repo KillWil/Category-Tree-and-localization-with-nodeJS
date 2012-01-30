@@ -4,6 +4,8 @@ The goal is to make a REST Full web service example under `NodeJS`, `ExpressJs` 
 I assume you have already installed node and the various extensions mentioned above.
 The project can be downloaded from [Git here](#https://github.com/KillWil/Category-Tree-and-localization-with-nodeJS).
 
+![Manage category tree efficiently with NodeJs](http://blogabill.billiouw.com/wp-content/uploads/2012/01/categories.png)
+
 ---
 
 **This first version allows you to:**
